@@ -6,6 +6,7 @@ import { COLORS } from '../../constants/colors';
 import { formatDate } from '../../utils/date';
 
 const StudentProfile = ({ student, onUpdate, showToast }) => {
+  if (!student) return null; // <-- prevents errors during first render
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(student);
 

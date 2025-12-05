@@ -6,6 +6,7 @@ import { COLORS } from '../constants/colors';
 import { formatDate } from '../utils/date';
 
 const Notifications = ({ student, onUpdate }) => {
+  if (!student) return null; // <-- prevents errors during first render
   const [notifications, setNotifications] = useState(student.notifications || []);
   const [filter, setFilter] = useState('all');
 

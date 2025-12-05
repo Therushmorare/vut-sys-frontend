@@ -6,6 +6,7 @@ import { formatDate } from '../../utils/date';
 import { COLORS } from '../../constants/colors';
 
 const StudentDashboard = ({ student, onNavigate }) => {
+  if (!student) return null; // <-- prevents errors during first render
   const getStatusColor = (status) => {
     switch(status) {
       case 'Active': return 'text-green-600 bg-green-50';

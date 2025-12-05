@@ -7,6 +7,7 @@ import { formatDate } from '../utils/date';
 import { useStudent } from '../constants/context';
 
 const DocumentUpload = ({ showToast }) => {
+  if (!student) return null; // <-- prevents errors during first render
   const { student, uploadDocument, signAgreement } = useStudent();
   const [selectedFiles, setSelectedFiles] = useState({});
 
