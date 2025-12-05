@@ -90,7 +90,7 @@ const Registration = ({ onRegister, onSwitchToLogin }) => {
     setApiError("");
 
     try {
-      const response = await fetch("/api/students/signup", {
+      const response = await fetch("https://d17qozs0vubb7e.cloudfront.net/api/students/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
