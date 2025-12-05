@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://seta-management-api-env.eba-rd7cpwya.us-east-1.elasticbeanstalk.com/api";
+const API_BASE_URL = "https://d17qozs0vubb7e.cloudfront.net/api";
 
 export const registerStudent = async (formData) => {
   try {
