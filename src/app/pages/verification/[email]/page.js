@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Verification from "../../components/auth/Verification";
+import Verification from "../../../components/auth/Verification";
 
 const VerificationPage = ({ params }) => {
   const router = useRouter();
