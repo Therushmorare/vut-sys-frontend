@@ -62,14 +62,17 @@ const Registration = ({ onRegister, onSwitchToLogin }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validateForm()) return;
 
-    setLoading(true);
+  setLoading(true);
+  setApiError('');
 
-    try {
-      const response = await fetch('https://d17qozs0vubb7e.cloudfront.net/api/students/signup', {
+  try {
+    const response = await fetch(
+      'https://d17qozs0vubb7e.cloudfront.net/api/students/signup',
+      {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -82,20 +85,29 @@ const Registration = ({ onRegister, onSwitchToLogin }) => {
           programme: formData.programme,
           password: formData.password
         })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setApiError(data.message || 'Something went wrong');
+    } else {
+      // SUCCESS -> redirect to Verification Page
+      onRegister(data); // optional: store user info in parent state
+      router.push({
+        pathname: '/verify', // your verification page route
+        query: { email: formData.email } // pass email to verification page
       });
-
-      const data = await response.json();
-
-      if (!response.ok) setApiError(data.message || 'Something went wrong');
-      else onRegister(data);
-
-    } catch (err) {
-      setApiError('Network error. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
     }
-  };
+
+  } catch (err) {
+    setApiError('Network error. Please try again.');
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: COLORS.bgLight }}>
