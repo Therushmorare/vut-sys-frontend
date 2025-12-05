@@ -1,3 +1,5 @@
+"use client";
+
 import { StudentProvider } from './constants/context';
 import './styles/globals.css';
 

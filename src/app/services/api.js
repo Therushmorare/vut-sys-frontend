@@ -1,3 +1,5 @@
+"use client";
+
 const API_BASE_URL = "https://d17qozs0vubb7e.cloudfront.net/api";
 
 export const registerStudent = async (formData) => {
