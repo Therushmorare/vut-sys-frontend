@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { GraduationCap, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react';
 import { COLORS } from '../../constants/colors';
 
-const Registration = ({ onSwitchToLogin }) => {
+const Registration = ({ onRegister, onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -19,6 +19,7 @@ const Registration = ({ onSwitchToLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
 
   const faculties = [
     'Engineering and Technology',
@@ -38,9 +39,8 @@ const Registration = ({ onSwitchToLogin }) => {
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
+    if (apiError) setApiError('');
   };
 
   const validateForm = () => {
@@ -56,9 +56,7 @@ const Registration = ({ onSwitchToLogin }) => {
     if (!formData.programme) newErrors.programme = 'Programme is required';
     if (!formData.password) newErrors.password = 'Password is required';
     else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -69,39 +67,31 @@ const Registration = ({ onSwitchToLogin }) => {
     if (!validateForm()) return;
 
     setLoading(true);
-    try {
-      // Map frontend keys to backend keys
-      const payload = {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        id_number: formData.idNumber,
-        faculty: formData.faculty,
-        programme: formData.programme,
-        password: formData.password
-      };
 
-      const response = await fetch(
-        "http://seta-management-api-env.eba-rd7cpwya.us-east-1.elasticbeanstalk.com/api/students/signup",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+    try {
+      const response = await fetch('http://seta-management-api-env.eba-rd7cpwya.us-east-1.elasticbeanstalk.com/api/students/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          id_number: formData.idNumber,
+          faculty: formData.faculty,
+          programme: formData.programme,
+          password: formData.password
+        })
+      });
 
       const data = await response.json();
 
-      if (response.ok) {
-        alert("Registration successful!");
-        onSwitchToLogin(); // redirect to login page
-      } else {
-        alert(data.message || "Registration failed.");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Network error. Please try again.");
+      if (!response.ok) setApiError(data.message || 'Something went wrong');
+      else onRegister(data);
+
+    } catch (err) {
+      setApiError('Network error. Please try again.');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -114,24 +104,163 @@ const Registration = ({ onSwitchToLogin }) => {
           <div className="flex justify-center mb-4">
             <GraduationCap className="w-16 h-16" style={{ color: COLORS.primary }} />
           </div>
-          <h1 className="text-3xl font-bold mb-2" style={{ color: COLORS.primary }}>
-            Student Registration
-          </h1>
+          <h1 className="text-3xl font-bold mb-2" style={{ color: COLORS.primary }}>Student Registration</h1>
           <p className="text-gray-600">Create your student portal account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {apiError && <p className="text-center text-sm mb-2" style={{ color: COLORS.danger }}>{apiError}</p>}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* ... all input fields remain exactly the same ... */}
+            {/* First Name */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">First Name *</label>
+              <input
+                type="text"
+                value={formData.firstName}
+                onChange={(e) => handleChange('firstName', e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                style={{ borderColor: errors.firstName ? COLORS.danger : COLORS.border }}
+              />
+              {errors.firstName && <p className="text-sm mt-1" style={{ color: COLORS.danger }}>{errors.firstName}</p>}
+            </div>
+
+            {/* Last Name */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">Last Name *</label>
+              <input
+                type="text"
+                value={formData.lastName}
+                onChange={(e) => handleChange('lastName', e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                style={{ borderColor: errors.lastName ? COLORS.danger : COLORS.border }}
+              />
+              {errors.lastName && <p className="text-sm mt-1" style={{ color: COLORS.danger }}>{errors.lastName}</p>}
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">Email Address *</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                  style={{ borderColor: errors.email ? COLORS.danger : COLORS.border }}
+                />
+              </div>
+              {errors.email && <p className="text-sm mt-1" style={{ color: COLORS.danger }}>{errors.email}</p>}
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">Phone Number *</label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => handleChange('phone', e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                  style={{ borderColor: errors.phone ? COLORS.danger : COLORS.border }}
+                  placeholder="+27 12 345 6789"
+                />
+              </div>
+              {errors.phone && <p className="text-sm mt-1" style={{ color: COLORS.danger }}>{errors.phone}</p>}
+            </div>
+
+            {/* ID Number */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">ID Number *</label>
+              <input
+                type="text"
+                value={formData.idNumber}
+                onChange={(e) => handleChange('idNumber', e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                style={{ borderColor: errors.idNumber ? COLORS.danger : COLORS.border }}
+                maxLength="13"
+                placeholder="0012315678912"
+              />
+              {errors.idNumber && <p className="text-sm mt-1" style={{ color: COLORS.danger }}>{errors.idNumber}</p>}
+            </div>
+
+            {/* Faculty */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">Faculty *</label>
+              <select
+                value={formData.faculty}
+                onChange={(e) => { handleChange('faculty', e.target.value); handleChange('programme', ''); }}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                style={{ borderColor: COLORS.border }}
+              >
+                {faculties.map(faculty => <option key={faculty} value={faculty}>{faculty}</option>)}
+              </select>
+            </div>
+
+            {/* Programme */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">Programme *</label>
+              <select
+                value={formData.programme}
+                onChange={(e) => handleChange('programme', e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                style={{ borderColor: errors.programme ? COLORS.danger : COLORS.border }}
+              >
+                <option value="">Select Programme</option>
+                {programmes[formData.faculty]?.map(prog => <option key={prog} value={prog}>{prog}</option>)}
+              </select>
+              {errors.programme && <p className="text-sm mt-1" style={{ color: COLORS.danger }}>{errors.programme}</p>}
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">Password *</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => handleChange('password', e.target.value)}
+                  className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                  style={{ borderColor: errors.password ? COLORS.danger : COLORS.border }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
+                </button>
+              </div>
+              {errors.password && <p className="text-sm mt-1" style={{ color: COLORS.danger }}>{errors.password}</p>}
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">Confirm Password *</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                  style={{ borderColor: errors.confirmPassword ? COLORS.danger : COLORS.border }}
+                />
+              </div>
+              {errors.confirmPassword && <p className="text-sm mt-1" style={{ color: COLORS.danger }}>{errors.confirmPassword}</p>}
+            </div>
           </div>
 
           <button
             type="submit"
-            disabled={loading}
             className="w-full py-3 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity"
             style={{ backgroundColor: COLORS.primary }}
+            disabled={loading}
           >
-            {loading ? "Registering..." : "Register"}
+            {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
 
