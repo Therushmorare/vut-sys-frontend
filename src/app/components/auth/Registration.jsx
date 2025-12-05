@@ -69,7 +69,7 @@ const Registration = ({ onRegister, onSwitchToLogin }) => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://seta-management-api-env.eba-rd7cpwya.us-east-1.elasticbeanstalk.com/api/students/signup', {
+      const response = await fetch('https://d17qozs0vubb7e.cloudfront.net/api/students/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
