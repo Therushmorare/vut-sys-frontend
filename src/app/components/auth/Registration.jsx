@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { GraduationCap, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react';
 import { COLORS } from '../../constants/colors';
+import { useRouter } from 'next/navigation';
+
+const router = useRouter();
 
 const Registration = ({ onRegister, onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
@@ -95,10 +98,7 @@ const handleSubmit = async (e) => {
     } else {
       // SUCCESS -> redirect to Verification Page
       onRegister(data); // optional: store user info in parent state
-      router.push({
-        pathname: '/verify', // your verification page route
-        query: { email: formData.email } // pass email to verification page
-      });
+      router.push(`/verification/${formData.email}`);
     }
 
   } catch (err) {
