@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import dynamic from 'next/dynamic';
+import StudentPortal from '../../components/Portal';
 import { StudentProvider } from '../../constants/context';
 
-// Mock initial student data
+// Mock initial student data - replace with your actual data fetching
 const mockStudent = {
   id: 1,
   studentNumber: 'VUT2024001',
@@ -26,9 +26,6 @@ const mockStudent = {
     }
   ]
 };
-
-// Dynamically import StudentPortal to prevent SSR
-const StudentPortal = dynamic(() => import('../../components/Portal'), { ssr: false });
 
 export default function Student() {
   return (
